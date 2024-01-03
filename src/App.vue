@@ -3,14 +3,14 @@ import { RouterView, useRoute } from 'vue-router'
 import AppNavbar from './components/AppNavbar.vue'
 import AppLayout from './layouts/AppLayout.vue'
 import { useFirebaseAuth, useCurrentUser } from "vuefire";
-import { useStore } from "./store/store"
+import { useStore } from "@/store/store"
 const route = useRoute()
 const auth = useFirebaseAuth()
+console.log("auth ==>", auth);
 const user = useCurrentUser()
+console.log("user ===>", user, user.value);
 const store = useStore();
-store.increment(!!user?.email)
-
-console.log(auth);
+store.setUser(!!user.value)
 </script>
 
 <template>

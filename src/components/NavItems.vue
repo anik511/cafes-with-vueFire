@@ -9,6 +9,7 @@ const auth = useFirebaseAuth();
 async function signOutOfCafe() {
   signOut(auth).then(() => {
     // Sign-out successful.
+    store.setUser(false)
     console.log('Logged out');
   }).catch((error) => {
     // An error happened.

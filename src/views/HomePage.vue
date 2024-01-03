@@ -6,7 +6,6 @@ import BaseCheckbox from '@/components/base/BaseCheckbox.vue'
 import BaseContainer from '@/components/base/BaseContainer.vue'
 import BaseForm from '@/components/base/BaseForm.vue'
 import BaseInput from '@/components/base/BaseInput.vue'
-
 import { collection, query, where, getDocs, onSnapshot } from "firebase/firestore";
 import { useFirestore, useCollection } from 'vuefire'
 const db = useFirestore()
@@ -78,6 +77,7 @@ const filteredCafes = computed(() => {
     )
   })
 })
+
 </script>
 
 <template>

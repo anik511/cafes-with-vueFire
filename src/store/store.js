@@ -6,7 +6,7 @@ export const useStore = defineStore({
     user: false
   }),
   actions: {
-    increment(payload) {
+    setUser(payload) {
         this.user = !!payload
     }
   }

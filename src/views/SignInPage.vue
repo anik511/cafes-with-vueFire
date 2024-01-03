@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useFirebaseAuth } from 'vuefire'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import BaseButton from '@/components/base/BaseButton.vue'
@@ -7,10 +8,13 @@ import BaseContainer from '@/components/base/BaseContainer.vue'
 import BaseCard from '@/components/base/BaseCard.vue'
 import BaseForm from '@/components/base/BaseForm.vue'
 import BaseInput from '@/components/base/BaseInput.vue'
-
+import { useStore } from "@/store/store"
+const router = useRouter()
+const store = useStore();
 const userInput = ref({
   email: '',
   password: '',
+  visible: false,
 })
 
 const auth = useFirebaseAuth()
@@ -25,6 +29,8 @@ async function createUser() {
       // Signed in
       const user = userCredential.user
       console.log(user)
+      store.setUser(!!user.value)
+      router.go(-1)
       // ...
     })
     .catch((error) => {
@@ -43,6 +49,9 @@ async function signInToFirebase() {
     .then((userCredential) => {
       // Signed in
       const user = userCredential.user
+      console.log(user)
+      store.setUser(!!user.value)
+      router.go(-1)
       // ...
     })
     .catch((error) => {
@@ -68,7 +77,9 @@ async function signInToFirebase() {
           <BaseInput
             v-model="userInput.password"
             label="Password"
-            type="password"
+            :append-inner-icon="userInput.visible ? 'mdi-eye-off' : 'mdi-eye'"
+            :type="userInput.visible ? 'text' : 'password'"
+            @click:append-inner="userInput.visible = !userInput.visible"
             required
           />
         </BaseForm>
