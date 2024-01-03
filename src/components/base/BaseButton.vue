@@ -1,7 +1,9 @@
-<script setup></script>
+<script setup>
+
+</script>
 
 <template>
-  <v-btn>
+  <v-btn >
     <slot />
   </v-btn>
 </template>

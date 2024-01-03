@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
-import { VueFire } from 'vuefire'
+import { VueFire, VueFireAuth } from 'vuefire'
 import { firebaseApp } from '@/firebase.js'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
@@ -15,13 +16,14 @@ const vuetify = createVuetify({
   components,
   directives,
 })
-
+const pinia = createPinia()
 const app = createApp(App)
 app.use(VueFire, {
   // imported above but could also just be created here
   firebaseApp,
-  modules: [],
+  modules: [VueFireAuth()],
 })
+app.use(pinia)
 app.use(router)
 app.use(vuetify)
 
