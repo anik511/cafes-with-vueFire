@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
+import Swal from 'sweetalert2'
 import { useRoute, useRouter } from 'vue-router'
 import { doc, updateDoc } from 'firebase/firestore'
 import { useFirestore, useDocument } from 'vuefire'
@@ -30,13 +31,24 @@ watch(cafeData, (cafeData)=>{
 })
 
 async function updateCafe() {
+  try {
     const updateCafeDoc = await updateDoc(docRef, {
         ...editCafe.value
     });
-    // console.log(updateCafeDoc);
-    if (true) {
-        router.push('/')
-    }
+    Swal.fire({
+      title: "Success",
+      text: "Cafe Updated Successfully",
+      icon: "success",
+    }).then((result) => {
+      router.push('/')
+    });
+  } catch (error) {
+    Swal.fire({
+      title: "Failed",
+      text: "Some thing went wrong",
+      icon: "warning",
+    })
+  }
 }
 </script>
 
@@ -65,7 +77,7 @@ async function updateCafe() {
               required
             />
             <BaseInput
-              v-model="editCafe.rating"
+              v-model.number="editCafe.rating"
               label="Rating"
               type="number"
               min="0"

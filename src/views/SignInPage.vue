@@ -20,45 +20,47 @@ const userInput = ref({
 const auth = useFirebaseAuth()
 
 async function createUser() {
-    createUserWithEmailAndPassword(
-        auth,
-        userInput.value.email,
-        userInput.value.password
-    )
-    .then((userCredential) => {
-      // Signed in
-      const user = userCredential.user
-      console.log(user)
-      store.setUser(!!user.value)
-      router.go(-1)
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code
-      const errorMessage = error.message
-      // ..
-    })
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      userInput.value.email,
+      userInput.value.password
+    );
+
+    // User is logged in
+    const user = userCredential.user;
+    console.log("logged in", user, user.uid);
+    store.setUser(!!user.uid);
+    router.go(-1);
+  } catch (error) {
+    // Handle errors here
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error(`Error ${errorCode}: ${errorMessage}`);
+  }
 }
 
 async function signInToFirebase() {
-  signInWithEmailAndPassword(
-    auth,
-    userInput.value.email,
-    userInput.value.password
-  )
-    .then((userCredential) => {
-      // Signed in
-      const user = userCredential.user
-      console.log(user)
-      store.setUser(!!user.value)
-      router.go(-1)
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code
-      const errorMessage = error.message
-    })
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      userInput.value.email,
+      userInput.value.password
+    );
+
+    // User is signed in
+    const user = userCredential.user;
+    console.log("Signed in",user, user.uid);
+    store.setUser(!!user.uid);
+    router.go(-1);
+  } catch (error) {
+    // Handle errors here
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error(`Error ${errorCode}: ${errorMessage}`);
+  }
 }
+
 </script>
 
 <template>

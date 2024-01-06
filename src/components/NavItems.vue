@@ -21,9 +21,9 @@ async function signOutOfCafe() {
 <template>
   <nav class="pr-4">
     <BaseButton to="/">Home</BaseButton>
-    <BaseButton to="/new">New</BaseButton>
+    <BaseButton v-if="store.user" to="/new">New</BaseButton>
     <BaseButton v-if="store.user" @click="signOutOfCafe">Sign-Out</BaseButton>
-    <BaseButton v-else to="/sign-in">Sign-In</BaseButton>
+    <BaseButton v-else="!store.user" to="/sign-in">Sign-In</BaseButton>
   </nav>
 </template>
 

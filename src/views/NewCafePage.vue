@@ -9,6 +9,7 @@ import BaseForm from '@/components/base/BaseForm.vue'
 import BaseInput from '@/components/base/BaseInput.vue'
 import { collection, addDoc } from "firebase/firestore"; 
 import { useFirestore } from 'vuefire'
+import Swal from 'sweetalert2'
 const router = useRouter()
 const db = useFirestore()
 const newCafe = ref({
@@ -17,17 +18,39 @@ const newCafe = ref({
   location: 'United States',
   price: 1,
   favorite: false,
-})
-
+});
+function resetCafe(){
+  newCafe.value.name = '';
+  newCafe.value.rating = 0;
+  newCafe.value.location = 'United States';
+  newCafe.value.price = 1;
+  newCafe.value.favorite = false;
+}
 // Add a new document with a generated id.
 async function addCafe(){
-  const newDoc = await addDoc(collection(db, "cafes"), {
-    ...newCafe.value
-  });
-  console.log(newDoc);
-  if (newDoc.id) {
-    router.push('/')
+  try {
+    const newDoc = await addDoc(collection(db, "cafes"), {
+      ...newCafe.value
+    });
+    
+    if (newDoc.id) {
+      Swal.fire({
+        title: "Success",
+        text: "Cafe Added Successfully",
+        icon: "success",
+      }).then((result) => {
+        resetCafe()
+        // router.push('/')
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      title: "Failed",
+      text: "Some thing went wrong",
+      icon: "warning",
+    })
   }
+  
 } 
 </script>
 
@@ -44,7 +67,7 @@ async function addCafe(){
             placeholder="Cafe with a Vue"
           />
           <BaseInput
-            v-model="newCafe.rating"
+            v-model.number="newCafe.rating"
             label="Rating"
             type="number"
             min="0"
