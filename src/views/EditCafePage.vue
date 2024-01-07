@@ -10,13 +10,14 @@ import BaseForm from '@/components/base/BaseForm.vue'
 import BaseInput from '@/components/base/BaseInput.vue'
 import BaseCheckbox from '@/components/base/BaseCheckbox.vue'
 import FormLayout from '@/layouts/FormLayout.vue'
- 
+
 const db = useFirestore()
 const route = useRoute()
 const router = useRouter()
 const docRef = doc(db, "cafes", route.params.id);
 const cafeData = useDocument(docRef)
 
+const loading = ref(false)
 const editCafe = ref({
   name: '',
   location: 'United States',
@@ -25,13 +26,21 @@ const editCafe = ref({
   description: '',
   favorite: true,
 })
-
+function isInvalid(value) {
+  console.log(value);
+  return value === null || value === undefined || typeof(value) !== 'number'? value.trim() === '':false;
+}
 watch(cafeData, (cafeData)=>{
     editCafe.value = {...cafeData,}
 })
 
 async function updateCafe() {
+  loading.value = true;
   try {
+    // Input validation
+    if (isInvalid(editCafe.value.name) || isInvalid(editCafe.value.location) || isInvalid(editCafe.value.price)) {
+      return;
+    }
     const updateCafeDoc = await updateDoc(docRef, {
         ...editCafe.value
     });
@@ -48,6 +57,8 @@ async function updateCafe() {
       text: "Some thing went wrong",
       icon: "warning",
     })
+  }finally {
+    loading.value = false;
   }
 }
 </script>
@@ -90,10 +101,10 @@ async function updateCafe() {
           </BaseForm>
         </template>
         <template v-slot:actions>
-          <BaseButton @click="updateCafe" variant="tonal" color="success">
+          <BaseButton :loading="loading" :disabled="loading || isInvalid(editCafe.name) || isInvalid(editCafe.location) || isInvalid(editCafe.price)" @click="updateCafe" variant="tonal" color="success">
             Save Changes
           </BaseButton>
-          <BaseButton to="/" variant="tonal" color="error" outline>
+          <BaseButton :to="{name:'home'}" variant="tonal" color="error" outline>
             Cancel
           </BaseButton>
         </template>

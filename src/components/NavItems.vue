@@ -3,14 +3,15 @@ import { useFirebaseAuth } from 'vuefire';
 import { signOut } from 'firebase/auth';
 import BaseButton from './base/BaseButton.vue'
 import { useStore } from "@/store/store"
+import { useRouter } from 'vue-router'
 const store = useStore();
-
+const router = useRouter()
 const auth = useFirebaseAuth();
 async function signOutOfCafe() {
   signOut(auth).then(() => {
     // Sign-out successful.
     store.setUser(false)
-    console.log('Logged out');
+    router.push('/')
   }).catch((error) => {
     // An error happened.
     console.error(error);

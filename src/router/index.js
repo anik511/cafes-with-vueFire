@@ -32,13 +32,18 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const auth = useFirebaseAuth()
+router.beforeEach(async (to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const auth = useFirebaseAuth();
   const store = useStore();
   store.setSpinner();
   console.log(store.spin);
-  auth.onAuthStateChanged((authUser) => {
+
+  try {
+    const authUser = await new Promise((resolve) => {
+      auth.onAuthStateChanged((user) => resolve(user));
+    });
+
     if (authUser) {
       // User is signed in
       store.setUser(true);
@@ -48,17 +53,21 @@ router.beforeEach((to, from, next) => {
       store.setUser(false);
       console.log(2);
     }
+    const isAuthenticated = store.user;
+
+    if (requiresAuth && !isAuthenticated) {
+      console.log("Router 1 ==> ", isAuthenticated, from);
+      next({ name: 'sign-in' });
+    } else {
+      console.log("Router 2 ==> ", isAuthenticated, from);
+      next();
+    }
+  } catch (error) {
+    console.error("Error in beforeEach:", error);
+    next(false);
+  }finally {
     store.setSpinner();
     console.log(store.spin);
-  });
-  const isAuthenticated = store.user /*check if user is authenticated */;
-
-  if (requiresAuth && !isAuthenticated) {
-    console.log("Router 1 ==> ", isAuthenticated, from);
-    next({ name: 'sign-in' })
-  } else {
-    console.log("Router 2==> ", isAuthenticated,from);
-    next()
   }
-})
+});
 export default router

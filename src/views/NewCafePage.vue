@@ -12,6 +12,7 @@ import { useFirestore } from 'vuefire'
 import Swal from 'sweetalert2'
 const router = useRouter()
 const db = useFirestore()
+const loading = ref(false)
 const newCafe = ref({
   name: '',
   rating: 0,
@@ -19,6 +20,15 @@ const newCafe = ref({
   price: 1,
   favorite: false,
 });
+
+function goBack() {
+  router.push('/')
+}
+function isInvalid(value) {
+  console.log(value);
+  return value === null || value === undefined || typeof(value) !== 'number'? value.trim() === '':false;
+}
+
 function resetCafe(){
   newCafe.value.name = '';
   newCafe.value.rating = 0;
@@ -28,7 +38,12 @@ function resetCafe(){
 }
 // Add a new document with a generated id.
 async function addCafe(){
+  loading.value = true;
   try {
+    // Input validation
+    if (isInvalid(newCafe.value.name) || isInvalid(newCafe.value.location) || isInvalid(newCafe.value.price)) {
+      return;
+    }
     const newDoc = await addDoc(collection(db, "cafes"), {
       ...newCafe.value
     });
@@ -49,6 +64,8 @@ async function addCafe(){
       text: "Some thing went wrong",
       icon: "warning",
     })
+  }finally {
+    loading.value = false;
   }
   
 } 
@@ -63,6 +80,7 @@ async function addCafe(){
           <BaseInput
             v-model="newCafe.name"
             label="Name"
+            type="text"
             required
             placeholder="Cafe with a Vue"
           />
@@ -88,10 +106,10 @@ async function addCafe(){
         </BaseForm>
       </template>
       <template v-slot:actions>
-        <BaseButton @click="addCafe" variant="tonal" color="success">
+        <BaseButton :loading="loading" :disabled="loading || isInvalid(newCafe.name) || isInvalid(newCafe.location) || isInvalid(newCafe.price)" @click="addCafe" variant="tonal" color="success">
           Add New Cafe
         </BaseButton>
-        <BaseButton variant="tonal" color="error" outline> Cancel </BaseButton>
+        <BaseButton :to="{name:'home'}" variant="tonal" color="error" outline> Cancel </BaseButton>
       </template>
     </BaseCard>
   </BaseContainer>
