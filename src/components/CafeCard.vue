@@ -8,6 +8,7 @@ import BaseImageCard from '@/components/base/BaseImageCard.vue'
 import BaseRating from '@/components/base/BaseRating.vue'
 import CafeImage from '@/components/CafeImage.vue'
 import { useStore } from "@/store/store"
+import Swal from 'sweetalert2'
 const store = useStore();
 
 
@@ -58,9 +59,32 @@ const priceSymbol = computed(() => {
 })
 
 const db = useFirestore();
+
 async function deleteCafe() {
   await deleteDoc(doc(db, "cafes", props.docId));
-} 
+}
+
+function confirmDelete() {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      deleteCafe()
+      Swal.fire({
+        title: "Deleted!",
+        text: "Cafe has been deleted.",
+        icon: "success"
+      });
+    }
+  });
+}
+ 
 </script>
 
 <template>
@@ -101,7 +125,7 @@ async function deleteCafe() {
       <BaseButton :disabled="!store.user" color="primary" :to="`/cafe/${docId}`">
         <BaseIcon icon="mdi-pencil" class="mr-1" /> Edit 
       </BaseButton>
-      <BaseButton :disabled="!store.user" @click="deleteCafe" color="error" text disabled>
+      <BaseButton :disabled="!store.user" @click="confirmDelete" color="error" text disabled>
         <BaseIcon icon="mdi-trash-can-outline" class="mr-1" />
         Delete
       </BaseButton>

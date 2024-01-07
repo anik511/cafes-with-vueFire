@@ -9,25 +9,65 @@ import BaseForm from '@/components/base/BaseForm.vue'
 import BaseInput from '@/components/base/BaseInput.vue'
 import { collection, addDoc } from "firebase/firestore"; 
 import { useFirestore } from 'vuefire'
+import Swal from 'sweetalert2'
 const router = useRouter()
 const db = useFirestore()
+const loading = ref(false)
 const newCafe = ref({
   name: '',
   rating: 0,
   location: 'United States',
   price: 1,
   favorite: false,
-})
+});
 
+function goBack() {
+  router.push('/')
+}
+function isInvalid(value) {
+  console.log(value);
+  return value === null || value === undefined || typeof(value) !== 'number'? value.trim() === '':false;
+}
+
+function resetCafe(){
+  newCafe.value.name = '';
+  newCafe.value.rating = 0;
+  newCafe.value.location = 'United States';
+  newCafe.value.price = 1;
+  newCafe.value.favorite = false;
+}
 // Add a new document with a generated id.
 async function addCafe(){
-  const newDoc = await addDoc(collection(db, "cafes"), {
-    ...newCafe.value
-  });
-  console.log(newDoc);
-  if (newDoc.id) {
-    router.push('/')
+  loading.value = true;
+  try {
+    // Input validation
+    if (isInvalid(newCafe.value.name) || isInvalid(newCafe.value.location) || isInvalid(newCafe.value.price)) {
+      return;
+    }
+    const newDoc = await addDoc(collection(db, "cafes"), {
+      ...newCafe.value
+    });
+    
+    if (newDoc.id) {
+      Swal.fire({
+        title: "Success",
+        text: "Cafe Added Successfully",
+        icon: "success",
+      }).then((result) => {
+        resetCafe()
+        // router.push('/')
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      title: "Failed",
+      text: "Some thing went wrong",
+      icon: "warning",
+    })
+  }finally {
+    loading.value = false;
   }
+  
 } 
 </script>
 
@@ -40,11 +80,12 @@ async function addCafe(){
           <BaseInput
             v-model="newCafe.name"
             label="Name"
+            type="text"
             required
             placeholder="Cafe with a Vue"
           />
           <BaseInput
-            v-model="newCafe.rating"
+            v-model.number="newCafe.rating"
             label="Rating"
             type="number"
             min="0"
@@ -65,10 +106,10 @@ async function addCafe(){
         </BaseForm>
       </template>
       <template v-slot:actions>
-        <BaseButton @click="addCafe" variant="tonal" color="success">
+        <BaseButton :loading="loading" :disabled="loading || isInvalid(newCafe.name) || isInvalid(newCafe.location) || isInvalid(newCafe.price)" @click="addCafe" variant="tonal" color="success">
           Add New Cafe
         </BaseButton>
-        <BaseButton variant="tonal" color="error" outline> Cancel </BaseButton>
+        <BaseButton :to="{name:'home'}" variant="tonal" color="error" outline> Cancel </BaseButton>
       </template>
     </BaseCard>
   </BaseContainer>

@@ -10,7 +10,7 @@ import { collection, query, where, getDocs, onSnapshot } from "firebase/firestor
 import { useFirestore, useCollection } from 'vuefire'
 const db = useFirestore()
 const cafeCollection = useCollection(collection(db, "cafes"))
-
+console.log(cafeCollection);
 // Original Firebase 
 // const q = query(collection(db, "cafes"));
 // const querySnapshot = await getDocs(q);

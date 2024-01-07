@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '@/views/HomePage.vue'
+import { useFirebaseAuth} from "vuefire";
 import { useStore } from "@/store/store"
 
 const router = createRouter({
@@ -31,15 +32,42 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+router.beforeEach(async (to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const auth = useFirebaseAuth();
   const store = useStore();
-  const isAuthenticated = store.user /*check if user is authenticated */;
+  store.setSpinner();
+  console.log(store.spin);
 
-  if (requiresAuth && !isAuthenticated) {
-    next({ name: 'sign-in' })
-  } else {
-    next()
+  try {
+    const authUser = await new Promise((resolve) => {
+      auth.onAuthStateChanged((user) => resolve(user));
+    });
+
+    if (authUser) {
+      // User is signed in
+      store.setUser(true);
+      console.log(1);
+    } else {
+      // User is signed out
+      store.setUser(false);
+      console.log(2);
+    }
+    const isAuthenticated = store.user;
+
+    if (requiresAuth && !isAuthenticated) {
+      console.log("Router 1 ==> ", isAuthenticated, from);
+      next({ name: 'sign-in' });
+    } else {
+      console.log("Router 2 ==> ", isAuthenticated, from);
+      next();
+    }
+  } catch (error) {
+    console.error("Error in beforeEach:", error);
+    next(false);
+  }finally {
+    store.setSpinner();
+    console.log(store.spin);
   }
-})
+});
 export default router

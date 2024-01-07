@@ -9,55 +9,76 @@ import BaseCard from '@/components/base/BaseCard.vue'
 import BaseForm from '@/components/base/BaseForm.vue'
 import BaseInput from '@/components/base/BaseInput.vue'
 import { useStore } from "@/store/store"
+
 const router = useRouter()
-const store = useStore();
+const store = useStore()
+const auth = useFirebaseAuth()
+
 const userInput = ref({
   email: '',
   password: '',
   visible: false,
+  loading: false,
 })
 
-const auth = useFirebaseAuth()
+function isInvalid(value) {
+  return value === null || value === undefined || value.trim() === '';
+}
 
 async function createUser() {
-    createUserWithEmailAndPassword(
-        auth,
-        userInput.value.email,
-        userInput.value.password
-    )
-    .then((userCredential) => {
-      // Signed in
-      const user = userCredential.user
-      console.log(user)
-      store.setUser(!!user.value)
-      router.go(-1)
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code
-      const errorMessage = error.message
-      // ..
-    })
+  try {
+    userInput.value.loading = true;
+
+    // Input validation
+    if (isInvalid(userInput.value.email) || isInvalid(userInput.value.password)) {
+      return;
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      userInput.value.email,
+      userInput.value.password
+    );
+
+    const user = userCredential.user;
+    store.setUser(!!user.uid);
+    router.go(-1);
+  } catch (error) {
+    // Handle errors here
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error(`Error ${errorCode}: ${errorMessage}`);
+  } finally {
+    userInput.value.loading = false;
+  }
 }
 
 async function signInToFirebase() {
-  signInWithEmailAndPassword(
-    auth,
-    userInput.value.email,
-    userInput.value.password
-  )
-    .then((userCredential) => {
-      // Signed in
-      const user = userCredential.user
-      console.log(user)
-      store.setUser(!!user.value)
-      router.go(-1)
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code
-      const errorMessage = error.message
-    })
+  try {
+    userInput.value.loading = true;
+
+    // Input validation
+    if (isInvalid(userInput.value.email) || isInvalid(userInput.value.password)) {
+      return;
+    }
+
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      userInput.value.email,
+      userInput.value.password
+    );
+    
+    const user = userCredential.user;
+    store.setUser(!!user.uid);
+    router.go(-1);
+  } catch (error) {
+    // Handle errors here
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error(`Error ${errorCode}: ${errorMessage}`);
+  } finally {
+    userInput.value.loading = false;
+  }
 }
 </script>
 
@@ -85,20 +106,28 @@ async function signInToFirebase() {
         </BaseForm>
       </template>
       <template v-slot:actions>
-        <BaseButton @click="signInToFirebase" variant="tonal" color="success">
-          Sign In
+        <BaseButton
+          @click="signInToFirebase"
+          variant="tonal"
+          color="success"
+          :disabled="userInput.loading || isInvalid(userInput.email) || isInvalid(userInput.password)"
+        >
+          {{ userInput.loading ? 'Signing In...' : 'Sign In' }}
         </BaseButton>
         <BaseButton
           @click="createUser"
           variant="tonal"
           color="secondary"
           outline
+          :disabled="userInput.loading || isInvalid(userInput.email) || isInvalid(userInput.password)"
         >
-          Create New User
+          {{ userInput.loading ? 'Creating User...' : 'Create New User' }}
         </BaseButton>
       </template>
     </BaseCard>
   </BaseContainer>
 </template>
 
-<style></style>
+<style>
+
+</style>
