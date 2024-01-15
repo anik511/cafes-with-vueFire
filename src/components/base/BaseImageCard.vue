@@ -5,12 +5,12 @@ import BaseImage from './BaseImage.vue'
 <template>
   <v-card dark class="mb-4">
     <v-row>
-      <v-col cols="3">
+      <v-col cols="12" sm="12" md="3">
         <v-container>
           <slot name="image" />
         </v-container>
       </v-col>
-      <v-col>
+      <v-col cols="12" sm="12" md="9">
         <v-card-item>
           <v-card-title>
             <slot name="title" />
