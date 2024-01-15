@@ -2,7 +2,7 @@
 
 <template>
   <v-row>
-    <v-col cols="3">
+    <v-col cols="12" sm="12" md="4">
       <slot name="sidebar" />
     </v-col>
     <v-col>
